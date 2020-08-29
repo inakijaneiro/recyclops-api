@@ -1,0 +1,27 @@
+{
+  "name": "recyclops-api",
+  "version": "1.0.0",
+  "description": "API for recyclops in HackMTY 2020.",
+  "main": "app.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inakijaneiro/recyclops-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/inakijaneiro/recyclops-api/issues"
+  },
+  "homepage": "https://github.com/inakijaneiro/recyclops-api#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.10.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
