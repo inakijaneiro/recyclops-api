@@ -4,7 +4,9 @@
   "description": "API for recyclops in HackMTY 2020.",
   "main": "app.js",
   "scripts": {
-    "test": "npm test"
+    "start": "node app.js",
+    "test": "npm test",
+    "start-dev": "nodemon app.js"
   },
   "repository": {
     "type": "git",
