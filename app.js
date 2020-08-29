@@ -7,7 +7,7 @@ const Product = require('./db/models/product');
 
 app.use(express.json())
 
-const PORT = 3000 | process.env.PORT;
+const PORT = 3000 || process.env.PORT;
 
 app.get("/", (req, res) => {
     res.send("Hello world")
