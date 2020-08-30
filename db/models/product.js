@@ -6,9 +6,9 @@ const ProductSchema = new mongoose.Schema({
     imagePaths: [String],
     wasteComposition:[
         {
-            name: String,
+            name: {type: String, required: true},
             description: String,
-            timeToLive: Number,
+            timeToLive: String,
         }
     ],
     instructions: String,
