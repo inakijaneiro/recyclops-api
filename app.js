@@ -5,6 +5,7 @@ require('dotenv').config()
 const db = require("./db")
 const Product = require('./db/models/product');
 const WasteComposition = require('./db/models/wasteComposition');
+const ProductForReview = require('./db/models/productForReview');
 const cors = require('cors')
 
 app.use(cors())
@@ -51,6 +52,61 @@ app.get("/api/v1/products/:id", (req, res) => {
             })
         }
     })
+})
+
+app.get('/api/v1/products_for_review/', (req, res) => {
+    ProductForReview.find({},(err, response) => {
+        if (err) return err;
+        let products = []
+        let responsePromises = []
+        response.forEach(product => {
+            if (product) {
+                let newWasteComposition = [];
+                let resolvedResultPromises = [];
+                product.wasteComposition.forEach(wasteComposition => {
+                    resolvedResultPromises.push(
+                        WasteComposition.findOne({name: wasteComposition.name}).then(completeWasteComposition => {
+                            newWasteComposition.push(completeWasteComposition);
+                        })
+                    )
+                })
+    
+                responsePromises.push(
+                    Promise.all(resolvedResultPromises).then(() => {
+                        product.wasteComposition = newWasteComposition;
+                        products.push(product);
+                    })
+                )
+            }
+        })
+        Promise.all(responsePromises).then(() => {
+            res.json({
+                code: 200,
+                message: "Products were found!",
+                data: products
+            });
+        })
+    })
+})
+
+app.post("/api/v1/products_for_review/", (req, res) => {
+
+    let product = new ProductForReview(req.body);
+
+    product.save()
+    .then(() => {
+        res.json({
+          code: 201,
+          message: `Product ${req.body.name} inserted successfully`,
+          data: null
+        })
+
+    })
+    .catch(err => res.json({
+        code: 409,
+        message: `${err}`,
+        data: null
+    }));
 })
 
 app.post("/api/v1/products/", (req, res) => {
