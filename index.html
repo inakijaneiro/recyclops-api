@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+  <title>Recylops</title>
+</head>
+<body>
+  <div id="app">
+
+    <div class="w-full max-w-5xl ml-auto mr-auto py-8">
+      <h1 class="text-xl text-gray-700 font-bold mb-4">Recyclops</h1>
+      <div class="flex">
+        <div class="w-1/2 mr-8">
+          <h2 class="text-md text-gray-700 font-bold mb-4">Upload new product</h2>
+          <form >
+            <!-- Name -->
+            <label
+              for="name"
+              class="block text-gray-700 text-sm mb-2">Name</label>
+            <input
+              v-model="name"
+              type="text"
+              name="name"
+              id="name"
+              class="shadow appearance-none border rounded w-full mb-4 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+
+            <!-- Description -->
+            <label
+              for="description"
+              class="block text-gray-700 text-sm mb-2">Description</label>
+            <input
+              v-model="description"
+              type="text"
+              name="description"
+              id="description"
+              class="shadow appearance-none border rounded w-full mb-4 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+
+            <!-- Image paths -->
+            <label
+              for="image_paths"
+              class="block text-gray-700 text-sm mb-2">Image paths</label>
+            <input
+              v-model="imagePaths"
+              type="text"
+              name="image_paths"
+              id="image_paths"
+              class="shadow appearance-none border rounded w-full mb-4 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+
+            <!-- Types of waste ids -->
+            <label
+              for="type_of_waste"
+              class="block text-gray-700 text-sm mb-2">Type of waste ids</label>
+            <div class="flex flex-wrap mb-4">
+              <label v-for="type in typeOfWaste" class="mr-4 mb-2">
+                <input class="mr-1" type="checkbox" v-model="selectedTypes" :value="type.name">
+                {{ type.name }}
+              </label>
+            </div>
+            <!-- Instructions -->
+            <label
+              for="instructions"
+              class="block text-gray-700 text-sm mb-2">Instructions</label>
+            <textarea
+              v-model="instructions"
+              type="textarea"
+              name="instructions"
+              id="instructions"
+              class="shadow appearance-none border rounded w-full mb-4 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" rows="10"></textarea>
+
+            <!-- GTIN -->
+            <label
+              for="gtin"
+              class="block text-gray-700 text-sm mb-2">GTIN</label>
+            <input
+              v-model="gtin"
+              type="text"
+              name="gtin"
+              id="gtin"
+              class="shadow appearance-none border rounded w-full mb-4 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+          
+            <input
+              @click.prevent="submitForm"
+              type="submit"
+              value="Enviar"
+              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          </form>
+        </div>
+
+        <div class="w-1/2 max-w-md  text-gray-800">
+          <h2 class="text-md text-gray-700 font-bold mb-4">Preview</h2>
+          <pre class="p-4 overflow-hidden bg-gray-300"><code class="inline-block">{{ previewJSON }}</code></pre>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script>
+    const app = new Vue({
+      el: '#app',
+      data: {
+        name: '',
+        description: '',
+        imagePaths: '',
+        typeOfWaste: [
+          {id: 1, name: "Papel y Cartón"},
+          {id: 2, name: "Plástico"},
+          {id: 3, name: "Plástico PET"},
+          {id: 4, name: "Plástico HDPE"},
+          {id: 5, name: "Baterías y Pilas"},
+          {id: 6, name: "E-waste"},
+          {id: 7, name: "Orgánico"},
+          {id: 8, name: "Vidrios"},
+          {id: 9, name: "Chatarra y metal"},
+        ],
+        selectedTypes: [],
+        instructions: '',
+        gtin: ''
+      },
+      methods: {
+        submitForm: function (e) {
+          const url = 'https://recyclops-hack.herokuapp.com/api/v1/products/'
+          const ip = this.imagePaths.split(',').map(p => p.trim())
+          const wc = this.selectedTypes.map(w => new Object({"name": w}))
+
+          const product = {
+            "name": this.name,
+            "description": this.description,
+            "imagePaths": ip,
+            "wasteComposition": wc, 
+            "instructions": this.instructions,
+            "gtin": this.gtin,
+          }
+
+          fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(product),
+            headers:{'Content-Type': 'application/json'}
+          }).then(res => res.json())
+            .then(json => {
+              if (json.code === 201) {
+                this.clearFields()
+              }
+            })
+            .catch(err => console.error(err.message))
+        },
+        clearFields: function () {
+          this.name = ''
+          this.description = ''
+          this.imagePaths = ''
+          this.selectedTypes = []
+          this.instructions = ''
+          this.gtin = ''
+        },
+      },
+      computed: {
+        previewJSON: function() {
+          const ip = this.imagePaths.split(',').map(p => p.trim())
+          const wc = this.selectedTypes.map(w => new Object({"name": w}))
+
+          const product = {
+            "name": this.name,
+            "description": this.description,
+            "imagePaths": ip,
+            "wasteComposition": wc, 
+            "instructions": this.instructions,
+            "gtin": this.gtin,
+          }
+
+          return JSON.stringify(product, null, 2)
+        }
+      }
+    })
+  </script>
+</body>
+</html>
