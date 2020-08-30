@@ -8,11 +8,14 @@ const WasteComposition = require('./db/models/wasteComposition');
 const ProductForReview = require('./db/models/productForReview');
 const cors = require('cors');
 const productForReview = require('./db/models/productForReview');
+const favicon = require('serve-favicon')
 
 app.use(cors())
 app.use(express.json())
 
 const PORT = process.env.PORT || 3000;
+
+app.use(favicon(__dirname + '/favicon.ico'))
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + '/index.html');
