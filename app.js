@@ -6,7 +6,8 @@ const db = require("./db")
 const Product = require('./db/models/product');
 const WasteComposition = require('./db/models/wasteComposition');
 const ProductForReview = require('./db/models/productForReview');
-const cors = require('cors')
+const cors = require('cors');
+const productForReview = require('./db/models/productForReview');
 
 app.use(cors())
 app.use(express.json())
@@ -57,35 +58,7 @@ app.get("/api/v1/products/:id", (req, res) => {
 app.get('/api/v1/products_for_review/', (req, res) => {
     ProductForReview.find({},(err, response) => {
         if (err) return err;
-        let products = []
-        let responsePromises = []
-        response.forEach(product => {
-            if (product) {
-                let newWasteComposition = [];
-                let resolvedResultPromises = [];
-                product.wasteComposition.forEach(wasteComposition => {
-                    resolvedResultPromises.push(
-                        WasteComposition.findOne({name: wasteComposition.name}).then(completeWasteComposition => {
-                            newWasteComposition.push(completeWasteComposition);
-                        })
-                    )
-                })
-    
-                responsePromises.push(
-                    Promise.all(resolvedResultPromises).then(() => {
-                        product.wasteComposition = newWasteComposition;
-                        products.push(product);
-                    })
-                )
-            }
-        })
-        Promise.all(responsePromises).then(() => {
-            res.json({
-                code: 200,
-                message: "Products were found!",
-                data: products
-            });
-        })
+        res.json(response);
     })
 })
 
@@ -107,6 +80,25 @@ app.post("/api/v1/products_for_review/", (req, res) => {
         message: `${err}`,
         data: null
     }));
+})
+
+app.delete('/api/v1/products_for_review/:id', (req, res) => {
+    productForReview.findOneAndDelete({gtin: req.params.id}, (err, product) => {
+        if (err) return err;
+        if (product)
+            res.json({
+                code: 200,
+                message: `Product with gtin ${req.params.id} successfully deleted`,
+                data: null
+            })
+        else 
+            res.json({
+                code: 404,
+                message: `There was a problem deleting product with gtin ${req.params.id}`,
+                data: null
+            })
+    })
+
 })
 
 app.post("/api/v1/products/", (req, res) => {
