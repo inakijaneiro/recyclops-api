@@ -18,6 +18,10 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + '/index.html');
 })
 
+app.get("/review", (req, res) => {
+  res.sendFile(__dirname + '/pages/review.html')
+})
+
 app.get("/api/v1/products/:id", (req, res) => {
 
     Product.findOne({
@@ -99,6 +103,13 @@ app.delete('/api/v1/products_for_review/:id', (req, res) => {
             })
     })
 
+})
+
+app.get('/api/v1/products/', (req, res) => {
+    Product.find({},(err, response) => {
+        if (err) return err;
+        res.json(response);
+    })
 })
 
 app.post("/api/v1/products/", (req, res) => {

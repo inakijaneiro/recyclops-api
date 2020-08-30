@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products for review</title>
+  <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+  
+  <div id="app">
+    <div class="w-full max-w-5xl ml-auto mr-auto py-8">
+      <h1 class="text-xl text-gray-700 font-bold mb-4">Products for review</h1>
+      <table class="table-auto">
+        <thead>
+          <tr class="bg-gray-400">
+            <th class="p-2">GTIN</th>
+            <th class="p-2">Name</th>
+            <th class="p-2">Description</th>
+            <th class="p-2">Waste type</th>
+            <th class="p-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="product of products">
+            <td class="p-2">{{ product.gtin }}</td>
+            <td class="p-2">{{ product.name }}</td>
+            <td class="p-2">{{ product.description }}</td>
+            <td class="p-2">{{ spreadObjectArray(product.wasteComposition, 'name') }}</td>
+            <td class="p-2">
+              <span class="mr-2 hover:underline cursor-pointer text-teal-500" @click="postProduct(product.gtin)">Accept</span>
+              <span class="mr-2 hover:underline cursor-pointer text-red-500" @click="deleteProduct(product.gtin)">Reject</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script>
+    const app = new Vue({
+      el: '#app',
+      data: {
+        products: [] 
+      },
+      mounted: function () {
+        this.fetchProducts()
+      },
+      methods: {
+        fetchProducts: function () {
+          const url = 'https://recyclops-hack.herokuapp.com/api/v1/products_for_review/'
+          fetch(url)
+            .then(res => res.json())
+            .then(res => this.products = res)
+        },
+        postProduct: function (gtin) {
+          const product = this.products.find(p => p.gtin === gtin)
+          const url = 'https://recyclops-hack.herokuapp.com/api/v1/products'
+          
+          fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(product),
+            headers:{'Content-Type': 'application/json'}
+          }).then(res => res.json())
+            .then(res => {
+              if(res.code === 201) {
+                console.log('Resource created!')
+              } else if (res.code === 409) {
+                console.log('Resource already exists!')
+              }
+            })
+            .catch(err => console.error(err.message))
+            .finally(res => {
+              window.scrollTo(0,0) 
+              this.deleteProduct(gtin)
+            })
+        
+        },
+        deleteProduct: function (gtin) {
+          const product = this.products.find(p => p.gtin === gtin)
+          const url = 'https://recyclops-hack.herokuapp.com/api/v1/products_for_review/'
+          
+          fetch(`${url}${gtin}`, {
+            method: 'DELETE',
+            headers: {'Content-Type': 'application/json'}
+          }).then(res => res.json())
+            .then(res => console.log(res.code, res.message))
+
+          this.products = this.products.filter(p => p.gtin !== gtin)
+        },
+        spreadObjectArray: function (arr, attr) {
+          return arr.map(el => el[attr])
+        }
+      }
+    })
+  </script>
+</body>
+</html>

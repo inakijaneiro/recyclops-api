@@ -126,7 +126,7 @@
       methods: {
         submitForm: function (e) {
           this.uploading = true
-          const url = 'https://recyclops-hack.herokuapp.com/api/v1/products/'
+          const url = 'https://recyclops-hack.herokuapp.com/api/v1/products_for_review/'
           const ip = this.imagePaths.split(',').map(p => p.trim())
           const wc = this.selectedTypes.map(w => new Object({"name": w}))
 
