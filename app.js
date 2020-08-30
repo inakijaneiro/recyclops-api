@@ -12,7 +12,7 @@ app.use(express.json())
 const PORT = process.env.PORT || 3000;
 
 app.get("/", (req, res) => {
-    res.sendfile('./index.html')
+  res.sendFile(__dirname + '/index.html');
 })
 
 app.get("/api/v1/products/:id", (req, res) => {
