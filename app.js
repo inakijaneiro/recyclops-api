@@ -4,13 +4,15 @@ require('dotenv').config()
 
 const db = require("./db")
 const Product = require('./db/models/product');
+const cors = require('cors')
 
+app.use(cors())
 app.use(express.json())
 
 const PORT = process.env.PORT || 3000;
 
 app.get("/", (req, res) => {
-    res.send("Hello world")
+    res.sendfile('./index.html')
 })
 
 app.get("/api/v1/products/:id", (req, res) => {
@@ -40,7 +42,12 @@ app.post("/api/v1/products/", (req, res) => {
 
     product.save()
     .then(() => {
-        res.send(`Product ${req.body.name} inserted successfully`)
+        res.json({
+          code: 201,
+          message: `Product ${req.body.name} inserted successfully`,
+          data: null
+        })
+
     })
     .catch(err => res.json({
         code: 409,
